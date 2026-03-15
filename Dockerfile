@@ -1,6 +1,6 @@
 # Paso 1: Usar Maven para compilar el código
 FROM maven:3.8.5-openjdk-17 AS build
-COPY . .
+COPY mascotas/ .
 RUN mvn clean package -DskipTests
 
 # Paso 2: Usar Java para correr el archivo .jar resultante
