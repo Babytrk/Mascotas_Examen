@@ -8,7 +8,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.Optional;
-@CrossOrigin(origins = "http://localhost:5173")
+
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/cliente")
 public class ClienteController {
@@ -19,13 +20,11 @@ public class ClienteController {
     @Autowired
     private MascotaRepository mascotaRepository;
 
-    /// metodos para obtener todos los clientes
     @GetMapping()
     public ResponseEntity<Iterable<Cliente>> findAll(){
         return ResponseEntity.ok(this.clienteRepository.findAll());
     }
 
-    /// metodo crear cliente
     @PostMapping()
     public ResponseEntity<Cliente> create(@RequestBody Cliente cliente, UriComponentsBuilder uriBuilder){
         if (cliente.getDireccion()!=null){
@@ -42,7 +41,6 @@ public class ClienteController {
         return ResponseEntity.created(uri).body(create);
     }
 
-    ///  buscar cliente por Id
     @GetMapping("/{idCliente}")
     public ResponseEntity<Cliente> findById(@PathVariable Long idCliente){
         Optional<Cliente> clienteOptional = clienteRepository.findById(idCliente);
@@ -53,7 +51,6 @@ public class ClienteController {
         }
     }
 
-    //actualizar cliente
     @PutMapping("/{idCliente}")
     public ResponseEntity<Cliente> update(@PathVariable Long idCliente, @RequestBody Cliente clienteActualizado){
         Optional<Cliente> clienteOptional = clienteRepository.findById(idCliente);
@@ -62,7 +59,6 @@ public class ClienteController {
         }
         Cliente clienteExistente = clienteOptional.get();
 
-        //actualizar los datos
         clienteExistente.setNombre(clienteActualizado.getNombre());
         clienteExistente.setApPaterno(clienteActualizado.getApPaterno());
         clienteExistente.setApMaterno(clienteActualizado.getApMaterno());
@@ -76,7 +72,7 @@ public class ClienteController {
         Cliente clienteUpdate = clienteRepository.save(clienteExistente);
         return ResponseEntity.ok(clienteUpdate);
     }
-    ///  metodo para eliminarClientes
+
     @DeleteMapping("/{idCliente}")
     public ResponseEntity<Void> delete(@PathVariable Long idCliente){
         if(clienteRepository.existsById(idCliente)){

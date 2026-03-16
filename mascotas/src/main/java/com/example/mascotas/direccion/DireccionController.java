@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/direccion")
 public class DireccionController {
@@ -24,7 +24,6 @@ public class DireccionController {
         return ResponseEntity.ok(direccionRepository.findAll());
     }
 
-    // GET por ID (Corrige el error 405 en búsquedas)
     @GetMapping("/{id}")
     public ResponseEntity<Direccion> findById(@PathVariable Long id) {
         return direccionRepository.findById(id)
@@ -32,14 +31,12 @@ public class DireccionController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // POST: Crea o Actualiza (Evita el error 500 por duplicados)
     @PostMapping
     public ResponseEntity<Direccion> create(@RequestBody Direccion direccion) {
         Optional<Cliente> clienteOpcional = clienteRepository.findById(direccion.getCliente().getIdCliente());
         if (clienteOpcional.isEmpty()) return ResponseEntity.unprocessableEntity().build();
 
         Cliente cliente = clienteOpcional.get();
-        // Si el cliente ya tiene dirección, le asignamos ese ID para sobreescribirla
         if (cliente.getDireccion() != null) {
             direccion.setIdDireccion(cliente.getDireccion().getIdDireccion());
         }
@@ -47,7 +44,6 @@ public class DireccionController {
         return ResponseEntity.ok(direccionRepository.save(direccion));
     }
 
-    // PUT: Actualizar por ID (Corrige el error 405 en actualizarDireccionID)
     @PutMapping("/{id}")
     public ResponseEntity<Direccion> update(@PathVariable Long id, @RequestBody Direccion detalles) {
         return direccionRepository.findById(id).map(existente -> {

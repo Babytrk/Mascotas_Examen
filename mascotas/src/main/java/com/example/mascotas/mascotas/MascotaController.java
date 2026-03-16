@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/mascota")
-@CrossOrigin(origins = "http://localhost:5173") // Permite la conexión con tu React
+@CrossOrigin(origins = "*")
 public class MascotaController {
 
     @Autowired
@@ -20,14 +20,12 @@ public class MascotaController {
     @Autowired
     private ClienteRepository clienteRepository;
 
-    // 1. OBTENER TODAS LAS MASCOTAS
     @GetMapping
     public ResponseEntity<List<Mascota>> findAll() {
         List<Mascota> mascotas = (List<Mascota>) mascotaRepository.findAll();
         return ResponseEntity.ok(mascotas);
     }
 
-    // 2. BUSCAR POR ID
     @GetMapping("/{id}")
     public ResponseEntity<Mascota> findById(@PathVariable Long id) {
         return mascotaRepository.findById(id)
@@ -35,10 +33,8 @@ public class MascotaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // 3. CREAR NUEVA MASCOTA (Con validación de Cliente)
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Mascota mascota) {
-        // Verificamos si el cliente existe antes de guardar
         if (mascota.getCliente() != null && mascota.getCliente().getIdCliente() != null) {
             Optional<Cliente> clienteOpt = clienteRepository.findById(mascota.getCliente().getIdCliente());
             if (clienteOpt.isPresent()) {
@@ -50,7 +46,6 @@ public class MascotaController {
         return ResponseEntity.badRequest().body("Error: Debes asignar un dueño (Cliente) válido a la mascota.");
     }
 
-    // 4. ACTUALIZAR MASCOTA
     @PutMapping("/{id}")
     public ResponseEntity<Mascota> update(@PathVariable Long id, @RequestBody Mascota mascotaActualizada) {
         return mascotaRepository.findById(id)
@@ -61,7 +56,6 @@ public class MascotaController {
                     mascotaExistente.setEdad(mascotaActualizada.getEdad());
                     mascotaExistente.setEnPeligro(mascotaActualizada.isEnPeligro());
 
-                    // Si cambias el dueño en la edición
                     if (mascotaActualizada.getCliente() != null) {
                         clienteRepository.findById(mascotaActualizada.getCliente().getIdCliente())
                                 .ifPresent(mascotaExistente::setCliente);
@@ -72,7 +66,6 @@ public class MascotaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // 5. ELIMINAR MASCOTA
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         if (mascotaRepository.existsById(id)) {

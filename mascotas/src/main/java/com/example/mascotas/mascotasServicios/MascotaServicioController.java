@@ -13,7 +13,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/mascota-servicio")
 public class MascotaServicioController {
@@ -27,13 +27,11 @@ public class MascotaServicioController {
     @Autowired
     private ServicioRepository servicioRepository;
 
-    /* 1. OBTENER TODOS LOS REGISTROS */
     @GetMapping
     public ResponseEntity<List<MascotaServicio>> findAll() {
         return ResponseEntity.ok((List<MascotaServicio>) mascotaServicioRepository.findAll());
     }
 
-    /* 2. OBTENER UN REGISTRO ESPECÍFICO POR ID */
     @GetMapping("/{id}")
     public ResponseEntity<MascotaServicio> findById(@PathVariable Long id) {
         return mascotaServicioRepository.findById(id)
@@ -41,10 +39,8 @@ public class MascotaServicioController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /* 3. REGISTRAR UN NUEVO SERVICIO A UNA MASCOTA */
     @PostMapping
     public ResponseEntity<MascotaServicio> create(@RequestBody MascotaServicio mascotaServicio, UriComponentsBuilder uriBuilder) {
-        // Validar que la mascota y el servicio existan antes de guardar
         if (mascotaServicio.getMascota() == null || mascotaServicio.getServicio() == null) {
             return ResponseEntity.badRequest().build();
         }
@@ -61,7 +57,6 @@ public class MascotaServicioController {
 
         MascotaServicio guardado = mascotaServicioRepository.save(mascotaServicio);
 
-        // CORRECCIÓN: Usamos .getId() porque ese es el nombre en tu entidad
         URI url = uriBuilder.path("/mascota-servicio/{id}")
                 .buildAndExpand(guardado.getId())
                 .toUri();
@@ -69,7 +64,6 @@ public class MascotaServicioController {
         return ResponseEntity.created(url).body(guardado);
     }
 
-    /* 4. ACTUALIZAR NOTA O FECHA */
     @PutMapping("/{id}")
     public ResponseEntity<MascotaServicio> update(@PathVariable Long id, @RequestBody MascotaServicio detalles) {
         return mascotaServicioRepository.findById(id).map(existente -> {
@@ -79,7 +73,6 @@ public class MascotaServicioController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    /* 5. ELIMINAR UN REGISTRO */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         if (!mascotaServicioRepository.existsById(id)) {
