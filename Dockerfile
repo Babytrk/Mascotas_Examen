@@ -1,10 +1,17 @@
-# Paso 1: Usar Maven para compilar el código
-FROM maven:3.8.5-openjdk-17 AS build
-COPY mascotas/ .
+# Etapa 1: Construcción
+FROM maven:3.9.9-eclipse-temurin-17-alpine AS build
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Paso 2: Usar Java para correr el archivo .jar resultante
-FROM openjdk:17.0.1-jdk-slim
-COPY --from=build /target/*.jar app.jar
+# Etapa 2: Imagen final
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+
+# Puerto que usa Spring Boot
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","app.jar"]
+
+# Comando para ejecutar la aplicación activando el perfil prod
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=prod", "--server.port=8080"]
